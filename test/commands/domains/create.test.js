@@ -1,17 +1,21 @@
-const {expect, test} = require('@oclif/test')
+const nock = require('nock');
+const execa = require('execa');
+const { expect } = require('chai');
 
 describe('domains:create', () => {
-  test
-  .stdout()
-  .command(['domains:create'])
-  .it('runs hello', ctx => {
-    expect(ctx.stdout).to.contain('hello world')
-  })
+  it('creates domain without assigning ip when ip is not passed', async () => {
+    nock('https://api.digitalocean.com/v2')
+      .post('/domains/', {
+        name: 'satyarohith.com'
+      })
+      .reply(200, {});
 
-  test
-  .stdout()
-  .command(['domains:create', '--name', 'jeff'])
-  .it('runs hello --name jeff', ctx => {
-    expect(ctx.stdout).to.contain('hello jeff')
-  })
-})
+    const { stdout } = await execa('./bin/run', [
+      'domains:create',
+      '--name',
+      'satyarohith.com'
+    ]);
+
+    expect(stdout).to.equal('satyarohith.com is created!');
+  });
+});
